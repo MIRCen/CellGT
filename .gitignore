@@ -1,0 +1,4 @@
+*.pth
+__pycache__
+cross_validation
+results_test
