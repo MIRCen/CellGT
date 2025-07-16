@@ -1,0 +1,42 @@
+[workspace]
+authors = ["Lilian Mehl <lilian.mehll@gmail.com>"]
+description = ""
+channels = ["nvidia/label/cuda-12.9", "conda-forge", "bioconda"]
+name = "cell-gt"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[system-requirements]
+cuda = "12.9"
+
+
+[activation]
+env = { XLA_FLAGS="--xla_gpu_cuda_data_dir=$PIXI_PROJECT_ROOT/.pixi/envs/$PIXI_ENVIRONMENT_NAME", TF_XLA_FLAGS="--tf_xla_enable_xla_devices" }
+
+
+[dependencies]
+python = "3.10"
+numpy = "*"
+pandas = "*"
+pytorch="*"
+pytorch_geometric = "2.4.0"
+pytorch_cluster = "*"
+pytorch_scatter = "*"
+pytorch_sparse="*"
+
+matplotlib = "*"
+scikit-learn = "*"
+shapely = "*"
+
+libcublas = "*"
+libcurand = "*"
+libcufft = "*"
+cuda-tools = "*"
+cuda-nvcc = "*"
+opencv="*"
+
+
+
+[pypi-dependencies]
+warmup_scheduler_pytorch="*"
+

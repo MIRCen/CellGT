@@ -92,7 +92,8 @@ def region_reconstruction(dataset):
     reconstructed_imgs=[]
     shapely_figures=[]
     for i, data_test in enumerate(dataset):
-        if i in [3, 4]:
+            #   if i in [3, 4]:
+
             masks_label = compute_masks_label(data_test.pred, alpha, data_test.pos, erosion=erosion,
                                       dilation=dilation)
             im_label = multi_polygon_to_image(masks_label, data_test)
@@ -122,26 +123,34 @@ if __name__=="__main__":
     parser.add_argument(
         '-m', '--model',
         type=str,
-        default=r'/home/lm279992/projects/Cell-GT/CellGT_GP1-S1_epoch_105.pth',
+        default=r'/home/lm279992/projects/CellGT/CellGT_GP1-S1_epoch_105.pth',
         help='Path to the trained model checkpoint'
     )
     parser.add_argument(
         '-t', '--test',
         type=str,
-        default='mouse_Gp4-S1',
+        default='sub-mouse1',
         help='Mouse sample to test'
     )
     args = parser.parse_args()
 
     # ==== Paths and Config ====
     data_results = Path(__file__).parent / "results_test"
-    test_name=f"Test_{args.type_network}_testmouse_{args.test}_{str(time.time())[-7:]}"
-    save_folder_name = data_results / test_name
+    data_results.mkdir(parents=True, exist_ok=True)
+    name_results = f"Test_{args.type_network}_region_reconstruction_{args.test}_{str(time.time())[-8:]}"
+    save_folder_name = data_results / name_results
     save_folder_name.mkdir(parents=True, exist_ok=True)
     reconstructed_images_name=save_folder_name/"reconstructed images"
     reconstructed_images_name.mkdir(parents=True, exist_ok=True)
     selected_features = cfg.selected_features
-    num_classes = 19
+    num_classes = cfg.num_classes
+
+    data_results = Path(args.data_path)/ "results_test"
+
+
+
+
+
 
 
     # ==== Model Definitions ====
@@ -157,7 +166,7 @@ if __name__=="__main__":
     model.eval()
 
     # ==== Dataloading ====
-    test_loader = create_dataloader_mice([args.test], Path(args.data_path), selected_features=selected_features,shuffle=False,
+    test_loader = create_dataloader_mice([args.test], Path(args.data_path), cfg=cfg, shuffle=False,
                                          knn_nb=10)
 
     dataset_prediction= inference_model(model, test_loader.dataset)

@@ -11,7 +11,7 @@ from data_management.data_preparation import get_list_ROI
 from graph_processing.concave_hull import compute_distances_points
 from utils import rearrange_labels_ROI_image
 
-def create_dataloader_mice(mice_list, data_path, selected_features=cfg.selected_features, shuffle=False, batch_size=1, knn_nb=10
+def create_dataloader_mice(mice_list, data_path, cfg=cfg, shuffle=False, batch_size=1, knn_nb=10
                       ):
     """
     Creates a PyTorch DataLoader for a list of mice datasets.
@@ -29,11 +29,14 @@ def create_dataloader_mice(mice_list, data_path, selected_features=cfg.selected_
     """
     data_list=[]
     for mouse in mice_list:
-        param_path = data_path / mouse / "80_paramap"
-        roi_path = data_path / mouse / "54_ROI_img_rotated"
+        param_path = data_path / mouse / cfg.url["param_path"]
+        roi_path = data_path / mouse / cfg.url["ROI_mask"]
+        #param_path = data_path /"derivatives"/ mouse / "neuron_feature_selection"
+        #roi_path = data_path /"derivatives"/mouse / "anatomical_region_ground_truth"
         data_list.extend(
-            create_datalist(param_path, data_ROI_path=roi_path, selected_features=selected_features, knn_nb=knn_nb)
+            create_datalist(param_path, data_ROI_path=roi_path, selected_features=cfg.selected_features, knn_nb=knn_nb)
         )
+
     loader = DataLoader(data_list, num_workers=42, batch_size=batch_size, shuffle=shuffle)
     return loader
 

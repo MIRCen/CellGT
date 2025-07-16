@@ -34,10 +34,8 @@ def inference_model(model, dataset):
     Returns:
         list: Dataset with added predicted labels (`data_test.pred`).
     """
-
     with torch.no_grad():
         for i, data_test in enumerate(dataset):
-            if i in [3,4]:
                 out = model(data_test.to(cfg.device))
                 data_test.pred=out.argmax(dim=1)
                 data_test.cpu()
@@ -64,24 +62,25 @@ if __name__=="__main__":
     parser.add_argument(
         '-m', '--model',
         type=str,
-        default=r'/home/lm279992/projects/Cell-GT/CellGT_GP1-S1_epoch_105.pth',
+        default=r'//home/Pbiopicsel/dataset/Mouse_NeuN_BIDS/data_BIDS/derivatives/classification_model/CellGT_GP1-S1_epoch_105.pth',
         help='Path to the trained model checkpoint'
     )
     parser.add_argument(
         '-t', '--test',
         type=str,
-        default='mouse_Gp4-S3',
+        default='sub-mouse1',
         help='Mouse sample to test'
     )
     args = parser.parse_args()
 
     # ==== Paths and Config ====
-    data_results = Path(__file__).parent / "results_test"
-    name_results = f"Test_{args.type_network}_testmouse_{args.test}_{str(time.time())[-8:]}"
+    data_results = Path(args.data_path)/ "results_test"
+    data_results.mkdir(parents=True, exist_ok=True)
+    name_results = f"Test_{args.type_network}_classification_{args.test}_{str(time.time())[-8:]}"
     save_folder_name = data_results / name_results
     save_folder_name.mkdir(parents=True, exist_ok=True)
     selected_features = cfg.selected_features
-    num_classes = 19
+    num_classes = cfg.num_classes
 
 
     # ==== Model Definitions ====
@@ -95,15 +94,13 @@ if __name__=="__main__":
         model = GraphUNet(len(selected_features),25,19,19).to(cfg.device)
         #model.load_state_dict(torch.load(args.model, map_location=cfg.device))
     model.eval()
-
-
-    test_loader = create_dataloader_mice([args.test], Path(args.data_path), selected_features=selected_features,
+    import time
+    test_loader = create_dataloader_mice([args.test], Path(args.data_path), cfg=cfg,
                                          shuffle=False, knn_nb=10)
+
     dataset_prediction= inference_model(model, test_loader.dataset)
     torch.save(dataset_prediction, save_folder_name / ('dataset_prediction_'+args.test+'.pt'))
     overall_accuracy, macro_f1, weighted_f1, f1_scores, accuracy_per_sample=compute_classification_metrics(dataset_prediction)
-
-
     # Print results
     logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s   %(message)s",

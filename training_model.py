@@ -52,7 +52,7 @@ if __name__=="__main__":
         '--train_mice',
         nargs='+',
         type=str,
-        default=['mouse_Gp4-S1', 'mouse_Gp4-S2'],# 'mouse_Gp4-S4', 'mouse_Gp5-S2', 'mouse_Gp5-S3', 'mouse_Gp5-S4', 'mouse_Gp5-S5','mouse_Gp5-S6'],
+        default=['mouse_Gp4-S1', 'mouse_Gp4-S4'],# 'mouse_Gp5-S2', 'mouse_Gp5-S3', 'mouse_Gp5-S4', 'mouse_Gp5-S5','mouse_Gp4-S3'],
         help='List of training mouse sample names'
     )
 
@@ -60,14 +60,13 @@ if __name__=="__main__":
         '--test_mice',
 
         type=str,
-        default='mouse_Gp4-S3',
+        default='mouse_Gp5-S6',
         help='List of test mouse sample names'
     )
 
     args = parser.parse_args()
 
     # ==== Paths and Config ====
-
 
 
     # ==== Paths and Config ====
@@ -77,6 +76,8 @@ if __name__=="__main__":
     save_folder_name.mkdir(parents=True, exist_ok=True)
     reconstructed_images_name=save_folder_name/"reconstructed images"
     reconstructed_images_name.mkdir(parents=True, exist_ok=True)
+    model_name = save_folder_name / "models"
+    model_name.mkdir(parents=True, exist_ok=True)
     selected_features = cfg.selected_features
     num_classes = 19
 
@@ -130,7 +131,26 @@ if __name__=="__main__":
                 overall_accuracy, macro_f1, weighted_f1, f1_scores, accuracy_per_sample = compute_classification_metrics(
                     dataset_test)
                 dataset_training= inference_model(model, train_loader.dataset)
-                #torch.save(model,save_folder_name.joinpath("models", str(model_name) + "_epoch_" + str(epoch) + ".pth"))
+                torch.save(model,save_folder_name.joinpath("models", str(model_name) + "_epoch_" + str(epoch) + ".pth"))
+                # Print results
+                logging.basicConfig(level=logging.INFO,
+                                    format="%(asctime)s   %(message)s",
+                                    handlers=[logging.FileHandler(save_folder_name.joinpath("test.log")),
+                                              logging.StreamHandler(sys.stdout)])
+                logger.info(f"{args.type_network} : {args.model}")
+                logger.info(f"=============== Prediction ===============")
+                logger.info(f"Url : {save_folder_name / ('dataset_prediction_' + args.test_mice + '.pt')}")
+                logger.info(f"=============== Performing test: {args.test_mice} ===============")
+                logger.info(f"Overall Accuracy: {overall_accuracy:.4f}")
+                logger.info("Accuracy per data sample:")
+                for idx, acc in enumerate(accuracy_per_sample):
+                    logger.info(f"  Slice {idx}: {acc:.4f}")
+                logger.info("F1-score per class : \n")
+                for cls, f1 in enumerate(f1_scores):
+                    logger.info(f"  Region {cls}: {f1:.4f}")
+                logger.info(f"Macro F1-score: {macro_f1:.4f}")
+                logger.info(f"Weighted F1-score: {weighted_f1:.4f}")
+
             total_loss = 0
             torch.cuda.empty_cache()
 
@@ -139,10 +159,19 @@ if __name__=="__main__":
                 model.train()
                 data_train = invert_point_cloud(data, cfg.train['class_number'])
                 data_train = transform(data_train).to(cfg.device)
-                out = model(data_train) #Perform a single forward pass.
+                out = model(data_train.x,data_train.edge_index) #Perform a single forward pass.
+                print("okkkkk")
+                print(out)
+                print("Output contains NaN:", torch.isnan(out).any())
+                print("Output max:", out.max().item())
+                print("Output min:", out.min().item())
+                print(out.shape)
+                print(data_train.y)
+                print(data_train.y.shape)
                 loss = criterion(out, data_train.y)  # Compute the loss solely based on the training nodes.
-                loss.backward()  # Derive gradients.
                 print(loss)
+                loss.backward()  # Derive gradients.
+
                 optimizer.step()  # Update parameter s based on gradients.
                 optimizer.zero_grad()
                 total_loss += loss.item()  # * data.num_graphs
