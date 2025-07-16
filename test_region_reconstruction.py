@@ -182,7 +182,7 @@ if __name__=="__main__":
                     format="%(asctime)s   %(message)s",
                     handlers=[logging.FileHandler(save_folder_name.joinpath("test.log")),
                               logging.StreamHandler(sys.stdout)])
-    logger.info(f"=============== Test name : {test_name} ===============\n")
+    logger.info(f"=============== Test name : {args.test} ===============\n")
     logger.info(f"=============== Model ===============")
     logger.info(f"{args.type_network} : {args.model}")
     logger.info(f"=============== Prediction ===============")
