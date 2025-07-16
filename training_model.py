@@ -52,7 +52,7 @@ if __name__=="__main__":
         '--train_mice',
         nargs='+',
         type=str,
-        default=['mouse_Gp4-S1', 'mouse_Gp4-S4'],# 'mouse_Gp5-S2', 'mouse_Gp5-S3', 'mouse_Gp5-S4', 'mouse_Gp5-S5','mouse_Gp4-S3'],
+        default=['sub-mouse1'],# 'mouse_Gp5-S2', 'mouse_Gp5-S3', 'mouse_Gp5-S4', 'mouse_Gp5-S5','mouse_Gp4-S3'],
         help='List of training mouse sample names'
     )
 
@@ -60,7 +60,7 @@ if __name__=="__main__":
         '--test_mice',
 
         type=str,
-        default='mouse_Gp5-S6',
+        default='sub-mouse1',
         help='List of test mouse sample names'
     )
 
@@ -70,8 +70,8 @@ if __name__=="__main__":
 
 
     # ==== Paths and Config ====
-    data_results = Path(__file__).parent / "results_train"
-    test_name=f"Test_{args.type_network}_testmouse_{args.test_mice}_{str(time.time())[-7:]}"
+    data_results = Path(args.data_path)/ "Results"
+    test_name=f"Train_{args.type_network}_testmouse_{args.test_mice}_{str(time.time())[-7:]}"
     save_folder_name = data_results / test_name
     save_folder_name.mkdir(parents=True, exist_ok=True)
     reconstructed_images_name=save_folder_name/"reconstructed images"
@@ -79,7 +79,7 @@ if __name__=="__main__":
     model_name = save_folder_name / "models"
     model_name.mkdir(parents=True, exist_ok=True)
     selected_features = cfg.selected_features
-    num_classes = 19
+    num_classes = cfg.num_classes
 
 
     # ==== Model Definitions ====
@@ -103,10 +103,10 @@ if __name__=="__main__":
 
     # ==== data loading ====
 
-    test_loader = create_dataloader_mice([args.test_mice], Path(args.data_path), selected_features=selected_features,
+    test_loader = create_dataloader_mice([args.test_mice], Path(args.data_path), cfg=cfg,
                                          shuffle=False, knn_nb=10)
     train_loader = create_dataloader_mice(args.train_mice, Path(args.data_path),
-                                          selected_features=selected_features,
+                                          cfg=cfg,
                                           shuffle=True, knn_nb=10, batch_size=2)
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.train['lr'])  # , weight_decay=0.1e-5)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
@@ -159,17 +159,9 @@ if __name__=="__main__":
                 model.train()
                 data_train = invert_point_cloud(data, cfg.train['class_number'])
                 data_train = transform(data_train).to(cfg.device)
-                out = model(data_train.x,data_train.edge_index) #Perform a single forward pass.
-                print("okkkkk")
-                print(out)
-                print("Output contains NaN:", torch.isnan(out).any())
-                print("Output max:", out.max().item())
-                print("Output min:", out.min().item())
-                print(out.shape)
-                print(data_train.y)
-                print(data_train.y.shape)
+                out = model(data_train) #Perform a single forward pass.
                 loss = criterion(out, data_train.y)  # Compute the loss solely based on the training nodes.
-                print(loss)
+
                 loss.backward()  # Derive gradients.
 
                 optimizer.step()  # Update parameter s based on gradients.
@@ -177,7 +169,6 @@ if __name__=="__main__":
                 total_loss += loss.item()  # * data.num_graphs
                 del out, data_train, loss
                 torch.cuda.empty_cache()
-            #warmup_scheduler.step()
             scheduler.step()
             logger.info(f"Epoch : {epoch} lr : {optimizer.param_groups[0]['lr']}, loss : {total_loss}")
 

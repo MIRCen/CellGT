@@ -1,5 +1,6 @@
 # CellGT
 
+Project for automatic classification of neurons per anatomical region in entire brain slices marked with the biomarker NeuN. 
 
 # Installation
 
