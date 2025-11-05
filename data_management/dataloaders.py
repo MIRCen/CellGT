@@ -29,10 +29,9 @@ def create_dataloader_mice(mice_list, data_path, cfg=cfg, shuffle=False, batch_s
     """
     data_list=[]
     for mouse in mice_list:
-        param_path = data_path / mouse / cfg.url["param_path"]
-        roi_path = data_path / mouse / cfg.url["ROI_mask"]
-        #param_path = data_path /"derivatives"/ mouse / "neuron_feature_selection"
-        #roi_path = data_path /"derivatives"/mouse / "anatomical_region_ground_truth"
+
+        param_path = data_path /"derivatives"/ mouse / "neuron_features"
+        roi_path = data_path /"derivatives"/ mouse / "ROI_ground_truth"
         data_list.extend(
             create_datalist(param_path, data_ROI_path=roi_path, selected_features=cfg.selected_features, knn_nb=knn_nb)
         )

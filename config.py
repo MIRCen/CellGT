@@ -14,7 +14,7 @@ url = dict(
 """
 url = dict(
     project = r"./",
-    param_path = r"./neuron_features/",
+    param_path = r"./derivatives/sub-mouse1/neuron_features/",
     ROI_mask = r"./anatomical_region_ground_truth/"
 
     )

@@ -97,7 +97,6 @@ if __name__=="__main__":
     import time
     test_loader = create_dataloader_mice([args.test], Path(args.data_path), cfg=cfg,
                                          shuffle=False, knn_nb=10)
-
     dataset_prediction= inference_model(model, test_loader.dataset)
     torch.save(dataset_prediction, save_folder_name / ('dataset_prediction_'+args.test+'.pt'))
     overall_accuracy, macro_f1, weighted_f1, f1_scores, accuracy_per_sample=compute_classification_metrics(dataset_prediction)

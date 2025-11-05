@@ -67,7 +67,7 @@ def visualize_superposed_region_image(G, coordinates, img, color=None):
     plt.yticks([])
     plt.imshow(img, extent=extent, interpolation='nearest')
     nx.draw_networkx(G, pos=[[c[1], c[0]] for c in coordinates], with_labels=False,
-                     node_color=color, cmap="Set2", node_size=3, width=0.2)
+                     node_color=color, cmap="Set2", node_size=2, width=0.2)
     plt.show()
 
 def visualize_embedding(h, color, epoch=None, loss=None):
@@ -104,7 +104,7 @@ def visualize_one_graph_from_data(data, pred, node_max=None, image=None, save_fo
         plt.xticks([])
         plt.yticks([])
         color = [colored(c) for c in color]
-        node_size = np.full(len(color), 3)
+        node_size = np.full(len(color), 1)
         nx.draw_networkx(graph, pos=[[c[1], c[0]] for c in coordinates_graph], with_labels=False,
                          node_color=color, node_size=node_size)
         plt.gca().invert_yaxis()
