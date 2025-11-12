@@ -12,9 +12,8 @@ curl -sSL https://prefix.dev/install.sh | bash
 Install the environment: pixi install
 Activate the environment: pixi shell
 
-# Dataset of 
-
-
+# Dataset for one mouse available at
+https://search.kg.ebrains.eu/instances/13b53eef-867d-4546-a435-d4819ae17734
 
 
 # Run neuron classification
