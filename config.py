@@ -4,14 +4,8 @@ from pathlib import Path
 import torch
 
 
-"""
-url = dict(
-    project = r"~/derivatives/sub-mouse1/neuron_feature_selection",
-    image = r"~/projects/graph_project/data/img_tif/",
-    cell_label_mask = r"~/projects/graph_project/data/cell_mask/",
-    ROI_mask = r"./data/coupe_souris_seg/"
-    )
-"""
+
+
 url = dict(
     project = r"./",
     param_path = r"./derivatives/sub-mouse1/neuron_features/",
@@ -28,10 +22,12 @@ selected_features = ['slice_numero', 'area_mm2', 'min_radius', 'angle', 'isotrop
                      'hsv_mean_hue', 'hsv_mean_saturation', 'hsv_mean_value', 'hsv_stand_dev_hue',
                      'hsv_stand_dev_saturation', 'hsv_stand_dev_value']
 
+
+
 num_classes = 19
 
 train = dict(
-    mice_list=['mouse_Gp1-S1', 'mouse_Gp4-S1'],#'mouse_Gp4-S2','mouse_Gp4-S3','mouse_Gp4-S4','mouse_Gp5-S3','mouse_Gp5-S4','mouse_Gp5-S5','mouse_Gp5-S6'],
+    mice_list=['mouse_Gp1-S1', 'mouse_Gp4-S1','mouse_Gp4-S2','mouse_Gp4-S3','mouse_Gp4-S4','mouse_Gp5-S3','mouse_Gp5-S4','mouse_Gp5-S5','mouse_Gp5-S6'],
     class_number = 19,
     n_epoch = 360,
     lr = 0.08,
@@ -50,6 +46,7 @@ cv = dict(
     step_size=20
 )
 
-
-
+color_list = ['#069AF3', '#069AF3', '#13EAC9', 'tab:orange', '#f6688e', 'y', 'tab:red',
+                               '#89a0b0', '#a4a2fe', '#228b22', '#addffd', '#c7faf2', '#ffe1ab', '#fcc5d3', '#ffffb1', '#ff7e7e', '#d3dbe1',
+                               '#d5d4ff', '#bdefbd', '#542E54']
 

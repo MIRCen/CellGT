@@ -7,7 +7,6 @@ from torch.nn import Linear as Lin
 from torch_cluster import knn_graph
 from torch_cluster import fps
 import torch_geometric.transforms as T
-from torch_geometric.datasets import ShapeNet
 from torch_geometric.loader import DataLoader
 from torch_geometric.nn import MLP, global_mean_pool, knn_interpolate
 from torch_geometric.nn.conv import PointTransformerConv
@@ -15,14 +14,11 @@ from torch_geometric.nn.pool import knn
 from torch_geometric.nn import GENConv, DeepGCNLayer
 from torch.nn import Linear, ReLU, LayerNorm
 
-
-
 from torch_scatter import scatter_max
-from torch_geometric.nn import GCNConv, TopKPooling, GINConv
+from torch_geometric.nn import GCNConv, TopKPooling
 from torch_geometric.utils import to_dense_batch
 import torch.nn as nn
 import matplotlib.pyplot as plt
-from visualization import visualize_graph, visualize_one_graph_from_data
 from models.PEGNN import GridCellSpatialRelationEncoder
 
 

@@ -12,6 +12,7 @@ from matplotlib.colors import ListedColormap
 import config as cfg
 import numpy as np
 
+from visualization import visualize_one_graph_from_data
 from data_management.dataloaders import create_dataloader_mice
 from utils import compute_classification_metrics
 from models.CellGT import  CellGT
@@ -44,7 +45,7 @@ def inference_model(model, dataset):
 
 
 if __name__=="__main__":
-
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     parser = argparse.ArgumentParser(description="Evaluate a trained model on a specific test mouse dataset.")
     parser.add_argument(
         '-d', '--data_path',
@@ -62,9 +63,14 @@ if __name__=="__main__":
     parser.add_argument(
         '-m', '--model',
         type=str,
-        default=r'//home/Pbiopicsel/dataset/Mouse_NeuN_BIDS/data_BIDS/derivatives/classification_model/CellGT_GP1-S1_epoch_105.pth',
+        default=os.path.join(script_dir, 'CellGT_model.pth'),
         help='Path to the trained model checkpoint'
     )
+    parser.add_argument(
+        '-v', '--visualise',
+        action='store_true',
+        help='store visualisation of the predicted graphs')
+        
     parser.add_argument(
         '-t', '--test',
         type=str,
@@ -76,7 +82,7 @@ if __name__=="__main__":
     # ==== Paths and Config ====
     data_results = Path(args.data_path)/ "results_test"
     data_results.mkdir(parents=True, exist_ok=True)
-    name_results = f"Test_{args.type_network}_classification_{args.test}_{str(time.time())[-8:]}"
+    name_results = f"pred_classif{args.type_network}_classification_{args.test}_{str(time.time())[-8:]}"
     save_folder_name = data_results / name_results
     save_folder_name.mkdir(parents=True, exist_ok=True)
     selected_features = cfg.selected_features
@@ -94,7 +100,7 @@ if __name__=="__main__":
         model = GraphUNet(len(selected_features),25,19,19).to(cfg.device)
         #model.load_state_dict(torch.load(args.model, map_location=cfg.device))
     model.eval()
-    import time
+
     test_loader = create_dataloader_mice([args.test], Path(args.data_path), cfg=cfg,
                                          shuffle=False, knn_nb=10)
     dataset_prediction= inference_model(model, test_loader.dataset)
@@ -109,7 +115,7 @@ if __name__=="__main__":
     logger.info(f"=============== Model ===============")
     logger.info(f"{args.type_network} : {args.model}")
     logger.info(f"=============== Prediction ===============")
-    logger.info(f"Url : {save_folder_name / ('dataset_prediction_'+args.test+'.pt')}")
+    logger.info(f"Results : {save_folder_name}")
     logger.info(f"=============== Performing test: {args.test} ===============")
     logger.info(f"Overall Accuracy: {overall_accuracy:.4f}")
     logger.info("Accuracy per data sample:")
@@ -120,6 +126,14 @@ if __name__=="__main__":
         logger.info(f"  Region {cls}: {f1:.4f}")
     logger.info(f"Macro F1-score: {macro_f1:.4f}")
     logger.info(f"Weighted F1-score: {weighted_f1:.4f}")
+    
+    if args.visualise:
+          save_folder_visualisation = save_folder_name / f"graph_visualisation"
+          save_folder_visualisation.mkdir(parents=True, exist_ok=True)
+
+          for p in range(len(dataset_prediction)):
+            visualize_one_graph_from_data(test_loader.dataset[p].cpu(), dataset_prediction[p].pred, save_folder_name=save_folder_visualisation, image_number=p,  image_name="graph_pred_")          
+          logger.info(f"Graph visualisation saved")
 
 
 
